@@ -3,3 +3,6 @@
 *.lib
 build/
 __pycache__/
+/assignment01/task04/data/*.txt
+/assignment01/task04/scripts/__pycache__/
+dump.txt

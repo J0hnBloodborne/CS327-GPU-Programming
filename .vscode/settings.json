@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "F:/Documents/CS327/assignment01/task02"
+    "cmake.sourceDirectory": "F:/Documents/CS327/assignment01/task02",
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }

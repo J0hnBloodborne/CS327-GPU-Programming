@@ -7,7 +7,7 @@ using mat = std::vector<std::vector<int>>;
 
 // Flat matrix storage (1D, no nested vectors)
 struct flat_mat {
-    std::vector<double> data;
+    std::vector<float> data;
     int rows;
     int cols;
 };

@@ -81,7 +81,7 @@ std::vector<flat_mat> readMatFlat(const std::string& in) {
         result[k].cols = cols;
         result[k].data.resize(total);
         for (int i = 0; i < total; i++) {
-            if (fscanf_s(f, "%lf", &result[k].data[i]) != 1) {
+            if (fscanf_s(f, "%f", &result[k].data[i]) != 1) {
                 fclose(f);
                 throw std::runtime_error("Invalid matrix data");
             }

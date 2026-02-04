@@ -11,5 +11,5 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    add_mat(argv[1], argc == 3 ? argv[2] : "output.txt");
+    add_mat(argv[1], argc == 3 ? argv[2] : "stdout");
 }

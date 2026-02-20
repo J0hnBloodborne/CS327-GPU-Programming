@@ -62,7 +62,7 @@ int main()
     printf("Multi Processor Count: %d\n", prop.multiProcessorCount);
     printf("-This is the number of multiprocessors on the device.\n\n");
 
-    printf("CUDA Cores: %d\n", prop.multiProcessorCount * (prop.warpSize / 32));
+    printf("CUDA Cores: %lf\n", (double)prop.multiProcessorCount * (double)prop.warpSize / 32.0);
     printf("-This is the total number of CUDA cores on the device, calculated as the number of multiprocessors multiplied by the number of warps per multiprocessor (assuming 32 threads per warp).\n\n");
     
 }

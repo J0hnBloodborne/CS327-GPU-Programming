@@ -4,32 +4,59 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
-def gen_file(filenames, matrices, rows, cols, value_min=1, value_max=10):
-    assert len(filenames) == len(matrices) == len(rows) == len(cols)
 
-    for fname, n_mat, r, c in zip(filenames, matrices, rows, cols):
-        print(f"Generating {fname.name} ({n_mat} x {r}x{c})...")
-        
-        # Pre-build one row string (all same value = fast)
-        row_str = " ".join(["67"] * c) + "\n"
-        
+def pattern_value(matrix_index, row_index, col_index):
+    return ((matrix_index + 1) * 17 + (row_index + 1) * 31 + (col_index + 1) * 13) % 97 + 1
+
+
+def build_row(matrix_index, row_index, cols):
+    return " ".join(
+        str(pattern_value(matrix_index, row_index, col_index))
+        for col_index in range(cols)
+    ) + "\n"
+
+
+def gen_file(filenames, a_rows, a_cols, b_cols):
+    assert len(filenames) == len(a_rows) == len(a_cols) == len(b_cols)
+
+    for fname, ar, ac, bc in zip(filenames, a_rows, a_cols, b_cols):
+        print(f"Generating {fname.name} (A:{ar}x{ac}, B:{ac}x{bc})...")
+
         with open(fname, "w", buffering=8*1024*1024) as f:  # 8MB buffer
-            f.write(f"{n_mat} {r} {c}\n")
-            for _ in range(n_mat):
-                # Write all rows at once
-                f.write(row_str * r)
-    
+            # New format:
+            # line1: number of matrices
+            # line2: rows cols for matrix A
+            # next rows: matrix A values
+            # next line: rows cols for matrix B
+            # next rows: matrix B values
+            f.write("2\n")
+
+            # Matrix A: ar x ac
+            f.write(f"{ar} {ac}\n")
+            for row_index in range(ar):
+                f.write(build_row(0, row_index, ac))
+
+            # Matrix B: ac x bc
+            f.write(f"{ac} {bc}\n")
+            for row_index in range(ac):
+                f.write(build_row(1, row_index, bc))
+
     print(f"Generated {len(filenames)} files in {DATA_DIR}")
 
 
 """
 Generate 10 files (input_size_1.txt to input_size_10.txt),
-each with 2 matrices, with increasing sizes:
-file 1: 1000x2000, file 2: 2000x3000, ..., file 10: 10000x11000
+each with a multipliable rectangular pair:
+file 1: A=1000x2000, B=2000x3000
+file 2: A=2000x3000, B=3000x4000
+...
+file 10: A=10000x11000, B=11000x12000
+
+Values are deterministic (non-random) and vary by matrix index, row, and column.
 """
 filenames = [DATA_DIR / f"input_size_{i}.txt" for i in range(1, 11)]
-matrices = [2] * 10
-rows = [1000 * i for i in range(1, 11)]
-cols = [1000 * (i + 1) for i in range(1, 11)]
+a_rows = [1000 * i for i in range(1, 11)]
+a_cols = [1000 * (i + 1) for i in range(1, 11)]
+b_cols = [1000 * (i + 2) for i in range(1, 11)]
 
-gen_file(filenames, matrices, rows, cols)
+gen_file(filenames, a_rows, a_cols, b_cols)

@@ -12,12 +12,19 @@ int main(int argc, char** argv)
 
     const std::string outputPath = (argc == 3) ? argv[2] : "stdout";
 
-    std::vector<mat> inputMats = readMat(argv[1]);
-    if (inputMats.size() < 2) {
-        throw std::runtime_error("Input must contain at least two matrices");
+    try {
+        std::vector<flat_mat> inputMats = readMat(argv[1]);
+        if (inputMats.size() < 2) {
+            throw std::runtime_error("Input must contain at least two matrices");
+        }
+
+        flat_mat result;
+        mulMat(inputMats[0], inputMats[1], result);
+        writeMat(outputPath, result);
+    } catch (const std::exception& ex) {
+        fprintf(stderr, "Error: %s\n", ex.what());
+        return 1;
     }
 
-    mat result;
-    mulMat(inputMats[0], inputMats[1], result);
-    writeMat(outputPath, result);
+    return 0;
 }

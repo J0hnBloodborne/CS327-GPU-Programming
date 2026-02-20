@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-
+#include <stdexcept>
 class mat {
 	public:
     std::vector<double> data;

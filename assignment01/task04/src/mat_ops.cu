@@ -23,8 +23,12 @@ void add_mat_gpu_compute_flat(const flat_mat& m1, const flat_mat& m2, flat_mat& 
     bool local_alloc = false;
 
     if (!d_acc || g_alloc_elems < total) {
-        cudaMalloc(&d_acc, size);
-        cudaMalloc(&d_m2, size);
+        if (cudaMalloc(&d_acc, size) != cudaSuccess) {
+            throw std::runtime_error("CUDA malloc failed for accumulator");
+        }
+        if (cudaMalloc(&d_m2, size) != cudaSuccess) {
+            throw std::runtime_error("CUDA malloc failed for matrix");
+        }
         local_alloc = true;
     }
 
@@ -43,8 +47,12 @@ void add_mat_gpu_compute_flat(const flat_mat& m1, const flat_mat& m2, flat_mat& 
     cudaMemcpy(result.data.data(), d_acc, size, cudaMemcpyDeviceToHost);
 
     if (local_alloc) {
-        cudaFree(d_acc);
-        cudaFree(d_m2);
+        if (cudaFree(d_acc) != cudaSuccess) {
+            throw std::runtime_error("CUDA free failed for accumulator");
+        }
+        if (cudaFree(d_m2) != cudaSuccess) {
+            throw std::runtime_error("CUDA free failed for matrix");
+        }
     }
 }
 
@@ -62,8 +70,12 @@ void add_nmat_gpu_compute_flat(const std::vector<flat_mat>& mats, flat_mat& resu
     bool local_alloc = false;
 
     if (!d_acc || g_alloc_elems < total) {
-        cudaMalloc(&d_acc, size);
-        cudaMalloc(&d_mat, size);
+        if (cudaMalloc(&d_acc, size) != cudaSuccess) {
+            throw std::runtime_error("CUDA malloc failed for accumulator");
+        }
+        if (cudaMalloc(&d_mat, size) != cudaSuccess) {
+            throw std::runtime_error("CUDA malloc failed for matrix");
+        }
         local_alloc = true;
     }
 
@@ -85,25 +97,41 @@ void add_nmat_gpu_compute_flat(const std::vector<flat_mat>& mats, flat_mat& resu
     cudaMemcpy(result.data.data(), d_acc, size, cudaMemcpyDeviceToHost);
 
     if (local_alloc) {
-        cudaFree(d_acc);
-        cudaFree(d_mat);
+        if (cudaFree(d_acc) != cudaSuccess) {
+            throw std::runtime_error("CUDA free failed for accumulator");
+        }
+        if (cudaFree(d_mat) != cudaSuccess) {
+            throw std::runtime_error("CUDA free failed for matrix");
+        }
     }
 }
 
 void init_gpu(size_t max_elements) {
     size_t size = max_elements * sizeof(float);
     if (g_alloc_elems >= max_elements) return;
-    if (g_d_acc) cudaFree(g_d_acc);
-    if (g_d_mat) cudaFree(g_d_mat);
+    if (g_d_acc)  if (cudaFree(g_d_acc) != cudaSuccess) {
+        throw std::runtime_error("CUDA free failed for accumulator");
+    }
+    if (g_d_mat)  if (cudaFree(g_d_mat) != cudaSuccess) {
+        throw std::runtime_error("CUDA free failed for matrix");
+    }
 
-    cudaMalloc(&g_d_acc, size);
-    cudaMalloc(&g_d_mat, size);
+    if (cudaMalloc(&g_d_acc, size) != cudaSuccess) {
+        throw std::runtime_error("CUDA malloc failed for accumulator");
+    }
+    if (cudaMalloc(&g_d_mat, size) != cudaSuccess) {
+        throw std::runtime_error("CUDA malloc failed for matrix");
+    }
 
     g_alloc_elems = max_elements;
 }
 
 void free_gpu() {
-    if (g_d_acc) { cudaFree(g_d_acc); g_d_acc = nullptr; }
-    if (g_d_mat) { cudaFree(g_d_mat); g_d_mat = nullptr; }
+    if (g_d_acc) { if (cudaFree(g_d_acc) != cudaSuccess) {
+        throw std::runtime_error("CUDA free failed for accumulator");
+    } }
+    if (g_d_mat) { if (cudaFree(g_d_mat) != cudaSuccess) {
+        throw std::runtime_error("CUDA free failed for matrix");
+    } }
     g_alloc_elems = 0;
 }

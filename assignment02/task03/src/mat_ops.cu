@@ -14,6 +14,7 @@ __global__ void matMulKernel(const double *M, const double *N, double *P, int M_
 		P[row * N_cols + col] = value; // +1
 	}
 	// Total registers = 19 --> round it up to 20 at most (right?)
+	// nvm just use occupancy function 👍
 
 }
 
@@ -41,7 +42,7 @@ mat mulMat(const mat& a, const mat& b) {
 	int blockSize1D;
 	cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize1D, matMulKernel, 0, 0);
 
-	int dim = std::sqrt(blockSize1D); // Square block top 1 because we have 2D data
+	int dim = (int)std::sqrt(blockSize1D); // Square block top 1 because we have 2D data
     dim3 blockDim(dim, dim);
 	dim3 gridDim((out.cols + blockDim.x - 1) / blockDim.x,(out.rows + blockDim.y - 1) / blockDim.y);
 

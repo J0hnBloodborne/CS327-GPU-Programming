@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cuda_runtime.h>
+#include "sm2core.h"
 
 int main()
 {
@@ -36,8 +37,14 @@ int main()
     printf("Compute Capability: %d.%d\n", prop.major, prop.minor);
     printf("-This is the compute capability of the device, represented as major and minor version numbers.\n\n");
 
-    printf("Peak compute performance: %.2lf GFLOPS\n", ((double)prop.multiProcessorCount * (double)prop.warpSize * (double)clockRateKHz) / (double)1000000);
-    printf("-This is the peak compute performance of the device in gigaflops, calculated as (number of multiprocessors) * (number of threads per warp) * (core clock rate in kHz) / 1,000,000.\n\n");
+
+    int coresPerSM = _ConvertSMVer2Cores(prop.major, prop.minor);
+    int totalCores = prop.multiProcessorCount * coresPerSM;
+    int flopsPerCore = 2;
+    double peakGFLOPS = ((double)totalCores * (double)clockRateKHz * (double)flopsPerCore) / 1000000.0;
+
+    printf("Peak compute performance: %.2lf GFLOPS\n", peakGFLOPS);
+    printf("-Peak FP32 performance estimated as (cores) * (clock kHz) * (FLOPs per core per cycle) / 1,000,000.\n\n");
 
     printf("Shared Memory Per Block: %d bytes\n", (int)prop.sharedMemPerBlock);
     printf("-This is the amount of shared memory available per block on the device.\n\n");
@@ -62,7 +69,6 @@ int main()
     printf("Multi Processor Count: %d\n", prop.multiProcessorCount);
     printf("-This is the number of multiprocessors on the device.\n\n");
 
-    printf("CUDA Cores: %lf\n", (double)prop.multiProcessorCount * (double)prop.warpSize / 32.0);
-    printf("-This is the total number of CUDA cores on the device, calculated as the number of multiprocessors multiplied by the number of warps per multiprocessor (assuming 32 threads per warp).\n\n");
-    
+    printf("CUDA Cores: %d\n", totalCores);
+    printf("-This is the total number of CUDA cores on the device (SMs * cores per SM).\n\n");
 }

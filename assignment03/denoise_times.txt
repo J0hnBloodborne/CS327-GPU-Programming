@@ -1,0 +1,4 @@
+CPU time 0.005406 s
+GPU time 0.141043 s
+Speedup 0.038x
+CPU/GPU mismatches 0
